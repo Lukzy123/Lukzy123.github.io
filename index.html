@@ -37,7 +37,7 @@
       50% { transform: scale(1.3); }
     }
     .texto-romantico {
-      white-space: pre-wrap;
+      white-space: pre-line;
       font-size: 1.2rem;
       color: #ff69b4;
     }
@@ -142,6 +142,7 @@
     drops = Array(columns).fill(1);
   });
 
+  // Texto romántico letra por letra con retraso
   const letraCompleta = `
 (Tu y yo)...
 Si tú sabes que te quiero,
@@ -196,17 +197,22 @@ Es que yo no puedo vivir sin tiii...
 Quiéreme, quiéreme, quiéreme que tuyo siempre seré (x4)
 `;
 
+  const lineas = letraCompleta.trim().split('\n');
   const elemento = document.getElementById("texto");
-  const texto = letraCompleta.trim();
-  let i = 0;
+  let lineaActual = 0;
 
-  function escribirLetraPorLetra() {
-    if (i < texto.length) {
-      elemento.textContent += texto[i];
-      i++;
-      if (i % 500 === 0) elemento.textContent = '';
-      setTimeout(escribirLetraPorLetra, 80); // velocidad de aparición
+  function escribirLinea() {
+    if (lineaActual >= lineas.length) return;
+    elemento.textContent += lineas[lineaActual] + '\n';
+    lineaActual++;
+
+    if (lineaActual % 10 === 0) {
+      setTimeout(() => {
+        elemento.textContent = '';
+      }, 2000);
     }
+
+    setTimeout(escribirLinea, 1250); 
   }
 
   document.getElementById('iniciarBtn').addEventListener('click', () => {
@@ -214,8 +220,8 @@ Quiéreme, quiéreme, quiéreme que tuyo siempre seré (x4)
     const audio = document.getElementById('audio');
     audio.play().catch(e => console.error("Autoplay error:", e));
     setTimeout(() => {
-      escribirLetraPorLetra();
-    }, 35000); // espera 35 segundos
+      escribirLinea();
+    }, 35000); // Espera 35 segundos antes de iniciar letra
   });
 </script>
 </body>
