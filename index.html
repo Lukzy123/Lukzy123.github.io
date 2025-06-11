@@ -12,15 +12,12 @@
       font-family: 'monospace';
       color: #ff69b4;
     }
-
     canvas {
       position: absolute;
       top: 0;
       left: 0;
-      display: block;
       z-index: 0;
     }
-
     .contenedor {
       position: absolute;
       top: 50%;
@@ -28,137 +25,125 @@
       transform: translate(-50%, -50%);
       text-align: center;
       z-index: 1;
-      width: 90%;
-      max-height: 90vh;
-      overflow: hidden;
+      width: 80%;
     }
-
     .corazon {
       font-size: 48px;
       margin-bottom: 20px;
       animation: latido 1s infinite;
     }
-
     @keyframes latido {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.3); }
     }
-
     .texto-romantico {
       white-space: pre-line;
       font-size: 1.2rem;
       color: #ff69b4;
     }
-
-    #playBtn {
+    button {
       position: absolute;
       top: 20px;
       left: 50%;
       transform: translateX(-50%);
+      z-index: 2;
       padding: 10px 20px;
-      font-size: 16px;
+      font-size: 18px;
       background-color: #ff69b4;
       border: none;
+      color: white;
       border-radius: 10px;
       cursor: pointer;
-      z-index: 2;
-      color: white;
     }
   </style>
 </head>
 <body>
-  <canvas id="canvas"></canvas>
 
-  <button id="playBtn">Iniciar</button>
+<canvas id="canvas"></canvas>
 
-  <div class="contenedor">
-    <div class="corazon">❤️</div>
-    <p id="texto" class="texto-romantico"></p>
-  </div>
+<div class="contenedor">
+  <div class="corazon">❤️</div>
+  <p id="texto" class="texto-romantico"></p>
+</div>
 
-  <audio id="musica" preload="auto">
-    <source src="https://lukzy123.github.io/cancion.mp3" type="audio/mpeg">
-    Tu navegador no soporta el audio.
-  </audio>
+<button id="iniciarBtn">Iniciar</button>
 
-  <script>
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
+<audio id="audio" src="https://lukzy123.github.io/cancion.mp3" preload="auto"></audio>
+
+<script>
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  let fontSize = 18;
+  let columns = Math.floor(canvas.width / fontSize);
+  let drops = Array(columns).fill(1);
+  let teAmo = "Te Amo";
+  let explosionParticles = [];
+
+  function drawMatrix() {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#ff69b4";
+    ctx.font = fontSize + "px monospace";
+    for (let i = 0; i < drops.length; i++) {
+      let char = teAmo.charAt(Math.floor(Math.random() * teAmo.length));
+      ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+      if (drops[i] * fontSize > canvas.height || Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+      drops[i]++;
+    }
+    updateExplosions();
+  }
+
+  function createExplosion(x, y) {
+    for (let i = 0; i < 30; i++) {
+      explosionParticles.push({
+        x: x,
+        y: y,
+        vx: (Math.random() - 0.5) * 6,
+        vy: (Math.random() - 0.5) * 6,
+        alpha: 1,
+        text: teAmo
+      });
+    }
+  }
+
+  function updateExplosions() {
+    for (let i = explosionParticles.length - 1; i >= 0; i--) {
+      let p = explosionParticles[i];
+      ctx.fillStyle = `rgba(255, 105, 180, ${p.alpha})`;
+      ctx.font = "16px monospace";
+      ctx.fillText(p.text, p.x, p.y);
+      p.x += p.vx;
+      p.y += p.vy;
+      p.alpha -= 0.02;
+      if (p.alpha <= 0) {
+        explosionParticles.splice(i, 1);
+      }
+    }
+  }
+
+  canvas.addEventListener("click", (e) => {
+    createExplosion(e.clientX, e.clientY);
+  });
+
+  function animate() {
+    drawMatrix();
+    requestAnimationFrame(animate);
+  }
+  animate();
+
+  window.addEventListener("resize", () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    let fontSize = 18;
-    let columns = Math.floor(canvas.width / fontSize);
-    let drops = Array(columns).fill(1);
-    let teAmo = "Te Amo";
-    let explosionParticles = [];
+    columns = Math.floor(canvas.width / fontSize);
+    drops = Array(columns).fill(1);
+  });
 
-    function drawMatrix() {
-      ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#ff69b4";
-      ctx.font = fontSize + "px monospace";
-
-      for (let i = 0; i < drops.length; i++) {
-        let char = teAmo.charAt(Math.floor(Math.random() * teAmo.length));
-        ctx.fillText(char, i * fontSize, drops[i] * fontSize);
-
-        if (drops[i] * fontSize > canvas.height || Math.random() > 0.975) {
-          drops[i] = 0;
-        }
-
-        drops[i]++;
-      }
-
-      updateExplosions();
-    }
-
-    function createExplosion(x, y) {
-      for (let i = 0; i < 30; i++) {
-        explosionParticles.push({
-          x: x,
-          y: y,
-          vx: (Math.random() - 0.5) * 6,
-          vy: (Math.random() - 0.5) * 6,
-          alpha: 1,
-          text: teAmo
-        });
-      }
-    }
-
-    function updateExplosions() {
-      for (let i = explosionParticles.length - 1; i >= 0; i--) {
-        let p = explosionParticles[i];
-        ctx.fillStyle = `rgba(255, 105, 180, ${p.alpha})`;
-        ctx.font = "16px monospace";
-        ctx.fillText(p.text, p.x, p.y);
-        p.x += p.vx;
-        p.y += p.vy;
-        p.alpha -= 0.02;
-
-        if (p.alpha <= 0) {
-          explosionParticles.splice(i, 1);
-        }
-      }
-    }
-
-    canvas.addEventListener("click", (e) => {
-      createExplosion(e.clientX, e.clientY);
-    });
-
-    function animate() {
-      drawMatrix();
-      requestAnimationFrame(animate);
-    }
-    animate();
-
-    window.addEventListener("resize", () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      columns = Math.floor(canvas.width / fontSize);
-      drops = Array(columns).fill(1);
-    });
-
-    const letraCompleta = `
+  // Texto romántico letra por letra con retraso
+  const letraCompleta = `
 (Tu y yo)...
 Si tú sabes que te quiero,
 que sin ti mi amor me muero.
@@ -209,36 +194,35 @@ Tú sabes que tú, tú sabes que tú sabes que yo he sido tuyo.
 (Tómame)
 Es que yo no puedo vivir sin tiii...
 
-Quiéreme, quiéreme, quiéreme que tuyo siempre seré (x4)`;
+Quiéreme, quiéreme, quiéreme que tuyo siempre seré (x4)
+`;
 
-    const textoElemento = document.getElementById("texto");
-    const musica = document.getElementById("musica");
-    const playBtn = document.getElementById("playBtn");
+  const lineas = letraCompleta.trim().split('\n');
+  const elemento = document.getElementById("texto");
+  let lineaActual = 0;
 
-    playBtn.addEventListener("click", () => {
-      musica.play();
-      playBtn.style.display = "none";
+  function escribirLinea() {
+    if (lineaActual >= lineas.length) return;
+    elemento.textContent += lineas[lineaActual] + '\n';
+    lineaActual++;
 
+    if (lineaActual % 10 === 0) {
       setTimeout(() => {
-        const lineas = letraCompleta.trim().split("\n");
-        let i = 0;
+        elemento.textContent = '';
+      }, 2000);
+    }
 
-        function escribirLinea() {
-          if (i >= lineas.length) return;
+    setTimeout(escribirLinea, 3500); // Más lento para leer mejor
+  }
 
-          textoElemento.textContent += lineas[i] + "\n";
-          i++;
-
-          if (i % 10 === 0) {
-            textoElemento.textContent = "";
-          }
-
-          setTimeout(escribirLinea, 1500); // más lento aún
-        }
-
-        escribirLinea();
-      }, 35000); // esperar 35 segundos
-    });
-  </script>
+  document.getElementById('iniciarBtn').addEventListener('click', () => {
+    document.getElementById('iniciarBtn').style.display = 'none';
+    const audio = document.getElementById('audio');
+    audio.play().catch(e => console.error("Autoplay error:", e));
+    setTimeout(() => {
+      escribirLinea();
+    }, 35000); // Espera 35 segundos antes de iniciar letra
+  });
+</script>
 </body>
 </html>
