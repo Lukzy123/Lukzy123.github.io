@@ -9,7 +9,7 @@
       padding: 0;
       overflow: hidden;
       background: black;
-      font-family: monospace;
+      font-family: 'monospace';
       color: #ff69b4;
     }
 
@@ -57,28 +57,30 @@
     <p id="texto" class="texto-romantico"></p>
   </div>
 
-  <!-- Audio musical desde Google Drive -->
-  <audio autoplay loop>
-    <source src="https://docs.google.com/uc?export=download&id=1sXq8BycjT5W_ybmdOr8sFb1CcekouSvx" type="audio/mpeg">
+  <!-- ✅ AUDIO LOCAL EN REPOSITORIO -->
+  <audio autoplay loop playsinline>
+    <source src="cancion.mp3" type="audio/mpeg">
     Tu navegador no soporta el audio.
   </audio>
 
   <script>
-    // Animación estilo Matrix con "Te Amo"
+    // --------- ANIMACIÓN DE FONDO "TE AMO" TIPO MATRIX ---------
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
+
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const fontSize = 18;
+    let fontSize = 18;
     let columns = Math.floor(canvas.width / fontSize);
     let drops = Array(columns).fill(1);
-    const teAmo = "Te Amo";
+    let teAmo = "Te Amo";
     let explosionParticles = [];
 
     function drawMatrix() {
       ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+
       ctx.fillStyle = "#ff69b4";
       ctx.font = fontSize + "px monospace";
 
@@ -143,8 +145,8 @@
       drops = Array(columns).fill(1);
     });
 
-    // Texto romántico letra por letra
-    const texto = `
+    // --------- TEXTO ROMÁNTICO QUE SE ESCRIBE LETRA POR LETRA ---------
+    const letraCompleta = `
 (Tu y yo)...
 Si tú sabes que te quiero,
 que sin ti mi amor me muero.
@@ -197,18 +199,19 @@ Es que yo no puedo vivir sin tiii...
 
 Quiéreme, quiéreme, quiéreme que tuyo siempre seré (x4)
     `;
-    const textoElemento = document.getElementById("texto");
+
+    const elemento = document.getElementById("texto");
     let i = 0;
 
-    function escribirTexto() {
-      if (i < texto.length) {
-        textoElemento.textContent += texto.charAt(i);
+    function escribir() {
+      if (i < letraCompleta.length) {
+        elemento.textContent += letraCompleta.charAt(i);
         i++;
-        setTimeout(escribirTexto, 55);
+        setTimeout(escribir, 55);
       }
     }
 
-    escribirTexto();
+    escribir();
   </script>
 </body>
 </html>
