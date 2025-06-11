@@ -9,7 +9,7 @@
       padding: 0;
       overflow: hidden;
       background: black;
-      font-family: 'monospace';
+      font-family: monospace;
       color: #ff69b4;
     }
 
@@ -47,119 +47,117 @@
       font-size: 1.2rem;
       color: #ff69b4;
     }
+
+    #boton-musica {
+      background-color: #ff69b4;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 20px;
+      animation: latido 2s infinite;
+    }
   </style>
 </head>
 <body>
-  <canvas id="canvas"></canvas>
 
-  <div class="contenedor">
-    <div class="corazon">❤️</div>
-    <p id="texto" class="texto-romantico"></p>
-  </div>
+<canvas id="canvas"></canvas>
 
-  <!-- Audio oculto -->
-  <audio id="musica" loop>
-    <source src="cancion.mp3" type="audio/mpeg">
-    Tu navegador no soporta el audio.
-  </audio>
+<div class="contenedor">
+  <div class="corazon">❤️</div>
+  <p id="texto" class="texto-romantico"></p>
+  <button id="boton-musica">▶ Reproducir Música</button>
+</div>
 
-  <!-- Reproducción automática tras primera interacción -->
-  <script>
-    function iniciarMusica() {
-      const audio = document.getElementById("musica");
-      audio.play().catch(err => console.log("Error al reproducir:", err));
-      document.removeEventListener("click", iniciarMusica);
-      document.removeEventListener("touchstart", iniciarMusica);
+<audio id="audio" loop>
+  <source src="cancion.mp3" type="audio/mpeg">
+  Tu navegador no soporta el audio.
+</audio>
+
+<script>
+  // MATRIZ FONDO
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  let fontSize = 18;
+  let columns = Math.floor(canvas.width / fontSize);
+  let drops = Array(columns).fill(1);
+  let teAmo = "Te Amo";
+  let explosionParticles = [];
+
+  function drawMatrix() {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "#ff69b4";
+    ctx.font = fontSize + "px monospace";
+
+    for (let i = 0; i < drops.length; i++) {
+      let char = teAmo.charAt(Math.floor(Math.random() * teAmo.length));
+      ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+
+      if (drops[i] * fontSize > canvas.height || Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+
+      drops[i]++;
     }
 
-    document.addEventListener("click", iniciarMusica);
-    document.addEventListener("touchstart", iniciarMusica);
-  </script>
+    updateExplosions();
+  }
 
-  <!-- Script de animación -->
-  <script>
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
+  function createExplosion(x, y) {
+    for (let i = 0; i < 30; i++) {
+      explosionParticles.push({
+        x: x,
+        y: y,
+        vx: (Math.random() - 0.5) * 6,
+        vy: (Math.random() - 0.5) * 6,
+        alpha: 1,
+        text: teAmo
+      });
+    }
+  }
 
+  function updateExplosions() {
+    for (let i = explosionParticles.length - 1; i >= 0; i--) {
+      let p = explosionParticles[i];
+      ctx.fillStyle = `rgba(255, 105, 180, ${p.alpha})`;
+      ctx.font = "16px monospace";
+      ctx.fillText(p.text, p.x, p.y);
+      p.x += p.vx;
+      p.y += p.vy;
+      p.alpha -= 0.02;
+      if (p.alpha <= 0) {
+        explosionParticles.splice(i, 1);
+      }
+    }
+  }
+
+  canvas.addEventListener("click", (e) => {
+    createExplosion(e.clientX, e.clientY);
+  });
+
+  function animate() {
+    drawMatrix();
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+
+  window.addEventListener("resize", () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    columns = Math.floor(canvas.width / fontSize);
+    drops = Array(columns).fill(1);
+  });
 
-    let fontSize = 18;
-    let columns = Math.floor(canvas.width / fontSize);
-    let drops = Array(columns).fill(1);
-    let teAmo = "Te Amo";
-    let explosionParticles = [];
-
-    function drawMatrix() {
-      ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.fillStyle = "#ff69b4";
-      ctx.font = fontSize + "px monospace";
-
-      for (let i = 0; i < drops.length; i++) {
-        let char = teAmo.charAt(Math.floor(Math.random() * teAmo.length));
-        ctx.fillText(char, i * fontSize, drops[i] * fontSize);
-
-        if (drops[i] * fontSize > canvas.height || Math.random() > 0.975) {
-          drops[i] = 0;
-        }
-
-        drops[i]++;
-      }
-
-      updateExplosions();
-    }
-
-    function createExplosion(x, y) {
-      for (let i = 0; i < 30; i++) {
-        explosionParticles.push({
-          x: x,
-          y: y,
-          vx: (Math.random() - 0.5) * 6,
-          vy: (Math.random() - 0.5) * 6,
-          alpha: 1,
-          text: teAmo
-        });
-      }
-    }
-
-    function updateExplosions() {
-      for (let i = explosionParticles.length - 1; i >= 0; i--) {
-        let p = explosionParticles[i];
-        ctx.fillStyle = `rgba(255, 105, 180, ${p.alpha})`;
-        ctx.font = "16px monospace";
-        ctx.fillText(p.text, p.x, p.y);
-        p.x += p.vx;
-        p.y += p.vy;
-        p.alpha -= 0.02;
-
-        if (p.alpha <= 0) {
-          explosionParticles.splice(i, 1);
-        }
-      }
-    }
-
-    canvas.addEventListener("click", (e) => {
-      createExplosion(e.clientX, e.clientY);
-    });
-
-    function animate() {
-      drawMatrix();
-      requestAnimationFrame(animate);
-    }
-
-    animate();
-
-    window.addEventListener("resize", () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      columns = Math.floor(canvas.width / fontSize);
-      drops = Array(columns).fill(1);
-    });
-
-    // Texto romántico animado
-    const letraCompleta = `
+  // TEXTO ROMÁNTICO
+  const letraCompleta = `
 (Tu y yo)...
 Si tú sabes que te quiero,
 que sin ti mi amor me muero.
@@ -197,20 +195,29 @@ por siempre mi amor.
 
 (Tú y yo por siempre tú y yo, tú y yo por siempre tú y yo)
 Nunca dudes de mi amor...
-`;
+  `;
 
-    const textoElemento = document.getElementById("texto");
-    let index = 0;
+  let index = 0;
+  const texto = document.getElementById("texto");
 
-    function escribirLetra() {
-      if (index < letraCompleta.length) {
-        textoElemento.textContent += letraCompleta.charAt(index);
-        index++;
-        setTimeout(escribirLetra, 50);
-      }
+  function escribirLetra() {
+    if (index < letraCompleta.length) {
+      texto.textContent += letraCompleta.charAt(index);
+      index++;
+      setTimeout(escribirLetra, 50);
     }
+  }
 
-    escribirLetra();
-  </script>
+  escribirLetra();
+
+  // BOTÓN DE MÚSICA
+  const boton = document.getElementById("boton-musica");
+  const audio = document.getElementById("audio");
+
+  boton.addEventListener("click", () => {
+    audio.play().catch((err) => console.log("Error al reproducir audio:", err));
+    boton.style.display = "none"; // Oculta el botón una vez se reproduce
+  });
+</script>
 </body>
 </html>
