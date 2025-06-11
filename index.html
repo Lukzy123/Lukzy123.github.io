@@ -57,14 +57,27 @@
     <p id="texto" class="texto-romantico"></p>
   </div>
 
-  <!-- ✅ AUDIO LOCAL EN REPOSITORIO -->
-  <audio autoplay loop playsinline>
+  <!-- Audio oculto -->
+  <audio id="musica" loop>
     <source src="cancion.mp3" type="audio/mpeg">
     Tu navegador no soporta el audio.
   </audio>
 
+  <!-- Reproducción automática tras primera interacción -->
   <script>
-    // --------- ANIMACIÓN DE FONDO "TE AMO" TIPO MATRIX ---------
+    function iniciarMusica() {
+      const audio = document.getElementById("musica");
+      audio.play().catch(err => console.log("Error al reproducir:", err));
+      document.removeEventListener("click", iniciarMusica);
+      document.removeEventListener("touchstart", iniciarMusica);
+    }
+
+    document.addEventListener("click", iniciarMusica);
+    document.addEventListener("touchstart", iniciarMusica);
+  </script>
+
+  <!-- Script de animación -->
+  <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
 
@@ -145,7 +158,7 @@
       drops = Array(columns).fill(1);
     });
 
-    // --------- TEXTO ROMÁNTICO QUE SE ESCRIBE LETRA POR LETRA ---------
+    // Texto romántico animado
     const letraCompleta = `
 (Tu y yo)...
 Si tú sabes que te quiero,
@@ -184,34 +197,20 @@ por siempre mi amor.
 
 (Tú y yo por siempre tú y yo, tú y yo por siempre tú y yo)
 Nunca dudes de mi amor...
-solo en ti pienso cariño,
-nunca dudes, nunca dudes
-de mí, de mi cariñoooo...
+`;
 
-(Quiéreme)
-Quiéreme por siempre, mamita dame tu calor.
-(Tómame)
-Yo solo quiero ser de ti, negrita por favor.
-(Quiéreme)
-Tú sabes que tú, tú sabes que tú sabes que yo he sido tuyo.
-(Tómame)
-Es que yo no puedo vivir sin tiii...
+    const textoElemento = document.getElementById("texto");
+    let index = 0;
 
-Quiéreme, quiéreme, quiéreme que tuyo siempre seré (x4)
-    `;
-
-    const elemento = document.getElementById("texto");
-    let i = 0;
-
-    function escribir() {
-      if (i < letraCompleta.length) {
-        elemento.textContent += letraCompleta.charAt(i);
-        i++;
-        setTimeout(escribir, 55);
+    function escribirLetra() {
+      if (index < letraCompleta.length) {
+        textoElemento.textContent += letraCompleta.charAt(index);
+        index++;
+        setTimeout(escribirLetra, 50);
       }
     }
 
-    escribir();
+    escribirLetra();
   </script>
 </body>
 </html>
