@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Te Amo</title>
   <style>
     body, html {
@@ -28,7 +28,9 @@
       transform: translate(-50%, -50%);
       text-align: center;
       z-index: 1;
-      width: 80%;
+      width: 90%;
+      max-height: 90%;
+      overflow: hidden;
     }
 
     .corazon {
@@ -44,119 +46,125 @@
 
     .texto-romantico {
       white-space: pre-line;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       color: #ff69b4;
-      min-height: 200px;
+      max-height: 60vh;
+      overflow: hidden;
     }
 
     #playBtn {
-      margin-top: 20px;
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
       padding: 10px 20px;
-      font-size: 1rem;
-      background-color: #ff69b4;
-      color: white;
+      font-size: 16px;
       border: none;
       border-radius: 10px;
+      background-color: #ff69b4;
+      color: white;
+      z-index: 10;
       cursor: pointer;
-      z-index: 2;
     }
   </style>
 </head>
 <body>
+  <canvas id="canvas"></canvas>
 
-<canvas id="canvas"></canvas>
-
-<div class="contenedor">
-  <div class="corazon">❤️</div>
-  <p id="texto" class="texto-romantico"></p>
   <button id="playBtn">🎵 Reproducir música</button>
-</div>
 
-<audio id="audio" loop>
-  <source src="https://docs.google.com/uc?export=download&id=1sXq8BycjT5W_ybmdOr8sFb1CcekouSvx" type="audio/mpeg">
-  Tu navegador no soporta el audio.
-</audio>
+  <div class="contenedor">
+    <div class="corazon">❤️</div>
+    <p id="texto" class="texto-romantico"></p>
+  </div>
 
-<script>
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+  <audio id="audio" loop>
+    <source src="https://lukzy123.github.io/cancion.mp3" type="audio/mpeg">
+    Tu navegador no soporta el audio.
+  </audio>
 
-let fontSize = 18;
-let columns = Math.floor(canvas.width / fontSize);
-let drops = Array(columns).fill(1);
-let teAmo = "Te Amo";
-let explosionParticles = [];
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
 
-function drawMatrix() {
-  ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "#ff69b4";
-  ctx.font = fontSize + "px monospace";
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-  for (let i = 0; i < drops.length; i++) {
-    let char = teAmo.charAt(Math.floor(Math.random() * teAmo.length));
-    ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+    let fontSize = 18;
+    let columns = Math.floor(canvas.width / fontSize);
+    let drops = Array(columns).fill(1);
+    let teAmo = "Te Amo";
+    let explosionParticles = [];
 
-    if (drops[i] * fontSize > canvas.height || Math.random() > 0.975) {
-      drops[i] = 0;
+    function drawMatrix() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#ff69b4";
+      ctx.font = fontSize + "px monospace";
+
+      for (let i = 0; i < drops.length; i++) {
+        let char = teAmo.charAt(Math.floor(Math.random() * teAmo.length));
+        ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height || Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+
+        drops[i]++;
+      }
+
+      updateExplosions();
     }
 
-    drops[i]++;
-  }
+    function createExplosion(x, y) {
+      for (let i = 0; i < 30; i++) {
+        explosionParticles.push({
+          x: x,
+          y: y,
+          vx: (Math.random() - 0.5) * 6,
+          vy: (Math.random() - 0.5) * 6,
+          alpha: 1,
+          text: teAmo
+        });
+      }
+    }
 
-  updateExplosions();
-}
+    function updateExplosions() {
+      for (let i = explosionParticles.length - 1; i >= 0; i--) {
+        let p = explosionParticles[i];
+        ctx.fillStyle = `rgba(255, 105, 180, ${p.alpha})`;
+        ctx.font = "16px monospace";
+        ctx.fillText(p.text, p.x, p.y);
+        p.x += p.vx;
+        p.y += p.vy;
+        p.alpha -= 0.02;
 
-function createExplosion(x, y) {
-  for (let i = 0; i < 30; i++) {
-    explosionParticles.push({
-      x: x,
-      y: y,
-      vx: (Math.random() - 0.5) * 6,
-      vy: (Math.random() - 0.5) * 6,
-      alpha: 1,
-      text: teAmo
+        if (p.alpha <= 0) {
+          explosionParticles.splice(i, 1);
+        }
+      }
+    }
+
+    canvas.addEventListener("click", (e) => {
+      createExplosion(e.clientX, e.clientY);
     });
-  }
-}
 
-function updateExplosions() {
-  for (let i = explosionParticles.length - 1; i >= 0; i--) {
-    let p = explosionParticles[i];
-    ctx.fillStyle = `rgba(255, 105, 180, ${p.alpha})`;
-    ctx.font = "16px monospace";
-    ctx.fillText(p.text, p.x, p.y);
-    p.x += p.vx;
-    p.y += p.vy;
-    p.alpha -= 0.02;
-
-    if (p.alpha <= 0) {
-      explosionParticles.splice(i, 1);
+    function animate() {
+      drawMatrix();
+      requestAnimationFrame(animate);
     }
-  }
-}
 
-canvas.addEventListener("click", (e) => {
-  createExplosion(e.clientX, e.clientY);
-});
+    animate();
 
-function animate() {
-  drawMatrix();
-  requestAnimationFrame(animate);
-}
-animate();
+    window.addEventListener("resize", () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      columns = Math.floor(canvas.width / fontSize);
+      drops = Array(columns).fill(1);
+    });
 
-window.addEventListener("resize", () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  columns = Math.floor(canvas.width / fontSize);
-  drops = Array(columns).fill(1);
-});
-
-// --------- TEXTO ROMÁNTICO QUE SE ESCRIBE LETRA POR LETRA ---------
-const letraCompleta = `
+    const letraCompleta = `
 (Tu y yo)...
 Si tú sabes que te quiero,
 que sin ti mi amor me muero.
@@ -165,61 +173,86 @@ como pienso en tu sonrisa,
 cuando me besa la brisa y el dorado de tu pelo...
 se me enreda entre mi cuerpo,
 cuando tú me amas siento que enloquecen mis sentidos,
-nada existe, nada vale, solo escucho tus gemiiiidoooos.
+nada existe, nada vale, solo escucho tus gemidos.
 
 Gloria si tú sabes que te quiero,
 que sin ti mi amor me muero.
 Nunca dudes que te amo,
-nunca dudes que te extraaañooo...
-que te aaaamoo...
+nunca dudes que te extraño...
+que te amo...
 
 (Tu y yo)...
 A pesar de estar ausente, en mi mente estás presente,
 y no importa la distancia, que a nosotros los amantes
 siento ansias del regreso, siento ansias de besarte,
 y en mis brazos amarrarte...
-y gritarte que eres miiiaaa...
+y gritarte que eres mía...
 
 Gloria si tú sabes que te quiero,
 que sin ti mi amor me muero.
 Nunca dudes que te amo,
-nunca dudes que te extraaañooo...
-que te aaaamoo...
+nunca dudes que te extraño...
+que te amo...
+
+(Tú y yo por siempre tú y yo)
+Desde que te conocí sentí
+que mi cuerpo vibraba de obsesión,
+de ser tuyo para siempre, por siempre cariño,
+por siempre mi amor.
+
+(Tú y yo por siempre tú y yo)
+Nunca dudes de mi amor...
+solo en ti pienso cariño,
+nunca dudes, nunca dudes
+de mí, de mi cariño...
+
+(Quiéreme)
+Quiéreme por siempre, mamita dame tu calor.
+(Tómame)
+Yo solo quiero ser de ti, negrita por favor.
+(Quiéreme)
+Tú sabes que tú, tú sabes que tú sabes que yo he sido tuyo.
+(Tómame)
+Es que yo no puedo vivir sin ti...
+
+Quiéreme, quiéreme, quiéreme que tuyo siempre seré.
 `;
 
-const elemento = document.getElementById("texto");
-let i = 0;
-let buffer = "";
+    const textoEl = document.getElementById("texto");
+    let i = 0;
+    let lineas = 0;
 
-function escribirLetra() {
-  if (i < letraCompleta.length) {
-    buffer += letraCompleta.charAt(i);
-    elemento.textContent = limitarLineas(buffer, 10);
-    i++;
-    setTimeout(escribirLetra, 90); // Velocidad lenta
-  }
-}
+    function escribir() {
+      if (i < letraCompleta.length) {
+        let char = letraCompleta.charAt(i);
+        textoEl.textContent += char;
+        if (char === "\n") lineas++;
 
-function limitarLineas(texto, maxLineas) {
-  const lineas = texto.split("\n");
-  if (lineas.length > maxLineas) {
-    return lineas.slice(lineas.length - maxLineas).join("\n");
-  }
-  return texto;
-}
+        if (lineas >= 10) {
+          let contenido = textoEl.textContent.split("\n");
+          contenido.splice(0, 1);
+          textoEl.textContent = contenido.join("\n");
+          lineas--;
+        }
 
-escribirLetra();
+        i++;
+        setTimeout(escribir, 90);
+      }
+    }
 
-// --------- BOTÓN PARA REPRODUCIR MÚSICA ---------
-document.getElementById("playBtn").addEventListener("click", () => {
-  const audio = document.getElementById("audio");
-  audio.play().then(() => {
-    document.getElementById("playBtn").style.display = "none";
-  }).catch((e) => {
-    alert("No se pudo reproducir automáticamente. Toca el botón de nuevo.");
-  });
-});
-</script>
+    escribir();
 
+    // Botón de música
+    const playBtn = document.getElementById("playBtn");
+    const audio = document.getElementById("audio");
+
+    playBtn.addEventListener("click", () => {
+      audio.play().then(() => {
+        playBtn.style.display = "none";
+      }).catch(() => {
+        alert("Activa el audio tocando el botón nuevamente.");
+      });
+    });
+  </script>
 </body>
 </html>
